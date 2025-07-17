@@ -1,161 +1,97 @@
-🧠 Aave Wallet Credit Scoring – ML Pipeline
+# 🧠 Aave Wallet Credit Scoring
 
-This project builds a machine learning pipeline to assign **DeFi credit scores (0–1000)** to wallets interacting with the **Aave V2 protocol on the Polygon network**, using historical transaction behavior.
-
----
-
-## 🛠️ Tech Stack
-
-| Layer         | Tool/Library                    |
-| ------------- | ------------------------------- |
-| Language      | Python 3.9+                     |
-| Data Handling | Pandas, JSON                    |
-| ML Model      | Scikit-learn (Random Forest)    |
-| Deployment    | CLI (Python script)             |
-| Storage       | Local `.pkl` model + JSON input |
-| Visualization | Jupyter Notebook (matplotlib)   |
+This project builds a machine learning model to assign a **credit score (0–1000)** to each wallet interacting with the **Aave V2 protocol** on **Polygon**, using only historical transaction behavior.
 
 ---
 
-## 📈 Project Goal
+## 🚀 Problem Statement
 
-Assign a **credit score between 0–1000** to each wallet based on:
+You are provided with 100K raw transaction-level records from the Aave V2 protocol.
 
-- Deposit frequency & volume
-- Withdraw/redemption activity
-- Asset diversity
-- Wallet activity duration
+Each entry includes:
 
-The higher the score, the more **trustworthy**, **active**, and **repayment-oriented** the wallet behavior appears.
+- Wallet address
+- Action (`deposit`, `borrow`, `repay`, `redeemunderlying`, `liquidationcall`)
+- Token, USD value, timestamp
+
+> Your task: Predict a **credit score between 0 and 1000** per wallet, where:
+> - Higher = trustworthy, responsible, consistent usage
+> - Lower = bot-like, exploitative, risky behavior
+
+---
+
+## 🏗️ Project Architecture
+
+aave-wallet-credit-score/
+├── data/
+│ └── user-wallet-transactions.json
+├── models/
+│ └── credit_score_model.pkl
+├── reports/
+│ └── analysis.md
+├── src/
+│ ├── parser.py
+│ ├── feature_engineering.py
+│ ├── model_utils.py
+│ ├── train_model.py
+│ └── score_wallets.py
+└── README.md
+
+yaml
+Copy
+Edit
 
 ---
 
 ## 🧪 Features Engineered
 
-| Feature        | Description                              |
-| -------------- | ---------------------------------------- |
-| total_actions  | Total number of actions taken            |
-| total_amount   | Total amount transacted (USD normalized) |
-| unique_assets  | Number of unique assets used             |
-| score (target) | Heuristic score for ML training          |
+| Feature                 | Description                                 |
+|------------------------|---------------------------------------------|
+| total_actions          | Total number of transactions per wallet     |
+| total_deposit_usd      | Normalized USD value of deposits            |
+| total_borrow_usd       | Total borrow volume                         |
+| num_unique_assets      | Distinct tokens interacted with             |
+| num_liquidations       | Times wallet got liquidated                 |
+| avg_tx_gap_days        | Avg time (days) between transactions        |
+| active_days            | Span between first & last tx (days)         |
+| net_flow               | Deposits - Withdrawals (USD)                |
 
 ---
 
-## 🧮 Credit Score Logic
+## 🔍 Model Training & Scoring
 
-We train a simple regression model (`RandomForestRegressor`) using a composite heuristic score and normalize it to a 0–1000 range.
+We use a **Random Forest Regressor** trained on heuristically-labeled scores from the above features. Scores are then:
 
-> Scores are saved to `wallet_scores.csv`
+- Normalized to **0–1000**
+- Stored in `wallet_scores.csv`
+
+> Training code: `python src/train_model.py`
 
 ---
 
-## 🚀 How to Run
+## 📜 How to Run
 
-### 1. Clone & Install
-
-````bash
-git clone https://github.com/Kanika84/aave-wallet-credit-score.git
-cd aave-wallet-credit-score
+### 1. Install dependencies
+```bash
 pip install -r requirements.txt
-2. Add Your Data
-Place user-wallet-transactions.json into the data/ folder.
-
-3. Train the Model
+2. Train the model
 bash
-Copy code
+Copy
+Edit
 python -m src.train_model
-4. Score a Wallet
+3. Generate credit scores
 bash
-Copy code
-python -m src.score_wallet 0xabc1234...your_wallet
-5. View Scores
-bash
-Copy code
-cat wallet_scores.csv
-🖼️ Screenshots
-Wallet Scoring	Credit Score Distribution
+Copy
+Edit
+python -m src.score_wallets
+Output will be saved in: wallet_scores.csv
 
-🔬 What I'd Improve Next
-Add clustering or anomaly detection (bot detection)
+✅ Deliverables
+✅ README.md: architecture, pipeline, features
 
-Incorporate liquidation/repayment data (not yet fully parsed)
+✅ analysis.md: score distribution and behavior
 
-Build REST API / dashboard (Flask + React)
+✅ wallet_scores.csv: final credit scores per wallet
 
-Export scores to MongoDB for dApps
-
-⏱️ Time Spent
-~5 hours: data parsing, feature engineering, ML training, CLI testing, README/report creation.
-
-👨‍⚖️ License
-MIT License
-
-🧑‍💻 Author
+👨‍💻 Author
 Kanika Sikka
-
-yaml
-Copy code
-
----
-
-## ✅ `reports/analysis.md`
-
-```markdown
-# 📊 Credit Score Analysis Report
-
-This report provides an analysis of the scores assigned to wallets using the trained ML model.
-
----
-
-## 🔢 Score Distribution
-
-| Score Range | Wallet Count |
-|-------------|--------------|
-| 0–100       | 3            |
-| 100–200     | 12           |
-| 200–300     | 21           |
-| 300–400     | 43           |
-| 400–500     | 56           |
-| 500–600     | 71           |
-| 600–700     | 49           |
-| 700–800     | 32           |
-| 800–900     | 18           |
-| 900–1000    | 8            |
-
-> 📌 Total wallets scored: 313
-
----
-
-## 🧠 Observations
-
-### ✅ High Scoring Wallets (800–1000)
-- Performed regular deposits in multiple assets (USDC, WMATIC)
-- Very active over time (long wallet lifetime)
-- High deposit-to-redeem ratios (net positive position)
-
-### ⚠️ Low Scoring Wallets (0–200)
-- Performed only 1–2 interactions
-- Redeemed more than deposited
-- Mostly interacted with a single asset
-
----
-
-## 📉 Visualizations
-
-### Credit Score Histogram
-![Histogram](screenshot2.png)
-
-### Asset Usage Heatmap
-![Heatmap](heatmap.png)
-
----
-
-## 🛠️ Next Steps for Deeper Insights
-- Analyze liquidation, repay, borrow events
-- Time-series activity clustering (seasonality, bursts)
-- Compare with known scam/bot lists
-
----
-
-Generated with ❤️ by Kanika Sikka
-````
