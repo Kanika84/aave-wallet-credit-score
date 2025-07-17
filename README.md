@@ -37,9 +37,7 @@ aave-wallet-credit-score/
 │ └── score_wallets.py
 └── README.md
 
-yaml
-Copy
-Edit
+
 
 ---
 
@@ -76,13 +74,9 @@ We use a **Random Forest Regressor** trained on heuristically-labeled scores fro
 pip install -r requirements.txt
 2. Train the model
 bash
-Copy
-Edit
 python -m src.train_model
 3. Generate credit scores
 bash
-Copy
-Edit
 python -m src.score_wallets
 Output will be saved in: wallet_scores.csv
 
