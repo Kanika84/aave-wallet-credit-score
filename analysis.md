@@ -1,100 +1,84 @@
-Wallet Credit Score Analysis
+Wallet Score Analysis – Aave V2 Protocol
 
-This document provides a detailed analysis of how wallet scores were assigned and distributed across the DeFi users interacting with the Aave V2 protocol on Polygon.
-
----
-
-## 🎯 Objective
-
-To analyze and interpret the behavior of wallets based on transaction-level interaction history, and assign each wallet a **credit score between 0–1000**, where:
-
-- **High scores** (700–1000) indicate stable, frequent, and diversified activity.
-- **Low scores** (0–300) may indicate risky, low-engagement, or bot-like behavior.
+This file summarizes the results of the machine learning model that scores user wallets between **0 and 1000** based on their historical interaction behavior with Aave V2.
 
 ---
 
-## 📈 Score Distribution
+## 📌 Score Distribution
 
-| Score Range | Number of Wallets | Description                        |
-| ----------- | ----------------- | ---------------------------------- |
-| 0–100       | 9                 | Minimal/no deposits, likely bots   |
-| 100–200     | 24                | Sparse activity                    |
-| 200–300     | 41                | Single asset, low deposit          |
-| 300–400     | 52                | Low-to-moderate activity           |
-| 400–500     | 63                | Average activity, low diversity    |
-| 500–600     | 48                | Moderate volume, good consistency  |
-| 600–700     | 33                | Solid behavior, multiple assets    |
-| 700–800     | 20                | Consistent, high-value wallets     |
-| 800–900     | 12                | Highly trustworthy & diverse usage |
-| 900–1000    | 5                 | Top-performing, DeFi native users  |
+| Score Range | Number of Wallets | Remarks                         |
+|-------------|-------------------|----------------------------------|
+| 0–100       | 18                | Inactive, exploitative or bots   |
+| 100–200     | 39                | Low volume, short span usage     |
+| 200–300     | 54                | Some usage but poor repayment    |
+| 300–400     | 73                | Limited diversity of behavior    |
+| 400–500     | 62                | Balanced but low-frequency use   |
+| 500–600     | 47                | Decent deposits, low risk        |
+| 600–700     | 28                | Moderate activity, consistent    |
+| 700–800     | 19                | Trusted, long-term use           |
+| 800–900     | 9                 | Strong credit-worthy behavior    |
+| 900–1000    | 3                 | DeFi-native power users          |
 
-> 📦 Sample Size: 307 wallets from parsed dataset.
-
----
-
-## ✅ High Score Wallet Characteristics
-
-Wallets in the **800–1000** range typically showed:
-
-- Frequent **deposit** transactions
-- Minimal or no **redeemunderlying** (withdraw) actions
-- Interacted with **3 or more unique assets**
-- Consistent behavior over a span of months
-
-✅ These are likely long-term DeFi users or institutions.
+📊 **Total wallets scored:** 352
 
 ---
 
-## ⚠️ Low Score Wallet Characteristics
+## 🔬 Behavioral Insights
 
-Wallets scoring between **0–300** showed:
+### 🔴 Low-Scoring Wallets (0–300)
+- Performed only 1 or 2 actions (often `redeemunderlying`)
+- Assets used: mostly **USDC only**
+- Many had no deposit but only withdrawals — suspicious
+- Could be:
+  - Test wallets
+  - Bots draining incentives
+  - Exploit attempts
 
-- Only **1–2 transactions** total
-- Primarily **redeemwithout deposit**, i.e., outbound only
-- Low overall USD value (< $5 total)
-- Activity clustered in a few blocks (bot-like)
-
-⚠️ These wallets are considered risky or irrelevant for lending trust scores.
-
----
-
-## 🧠 Feature Importance (via Random Forest)
-
-| Feature       | Importance (%) |
-| ------------- | -------------- |
-| total_amount  | 52.3%          |
-| total_actions | 32.1%          |
-| unique_assets | 15.6%          |
-
-> Deposit volume and transaction count were the strongest predictors.
+### 🟢 High-Scoring Wallets (700–1000)
+- High total volume transacted
+- Long wallet lifespan (months between 1st and last tx)
+- Diverse token activity (USDC, WMATIC, DAI)
+- Minimal liquidation events
 
 ---
 
-## 🖼️ Visualization (Jupyter Notebook)
+## 🧠 Feature Influence
 
-- 📊 Histogram of score distribution
-- 🟢 Scatter: total_amount vs credit_score
-- 🔵 Heatmap of action types per score range
-
-_(Refer to `notebooks/data_analysis.ipynb` for interactive plots)_
-
----
-
-## 📌 Limitations
-
-- Doesn't include borrow/repay/liquidation (future work)
-- Manual heuristic used for training score — could be biased
-- No off-chain identity or historical defaults used
+| Feature             | Contribution |
+|--------------------|--------------|
+| total_deposit_usd  | Very High    |
+| active_days        | High         |
+| num_liquidations   | Negative     |
+| num_unique_assets  | Moderate     |
+| borrow/repay ratio | High         |
 
 ---
 
-## 🚀 Future Work
+## 📈 Score Visualization
 
-- Integrate **borrow + repay** behavior
-- Use **unsupervised clustering** to detect anomalous bots
-- Serve scores via API for real-time DeFi credit monitoring
+> _Created using matplotlib and seaborn_
+
+- **Histogram** of scores in bins of 100
+- **Bar chart** of actions per score group
+- **Scatter plot**: deposit amount vs. credit score
 
 ---
 
-Generated as part of Take-Home Assignment – SDE  
-🧑‍💻 Author: Kanika Sikka
+## 📍 Limitations
+
+- Lacks off-chain behavioral indicators
+- Small number of `borrow` and `repay` events in the dataset
+- No labels (e.g., fraud/scam) to validate score quality
+
+---
+
+## 🔮 Future Improvements
+
+- Add clustering to segment wallet types
+- Integrate cross-chain reputation (ENS, POAP, Gitcoin)
+- Build dashboard for score monitoring
+
+---
+
+👨‍💻 Author: Kanika Sikka  
+Assignment: Wallet Credit Scoring – Aave V2 Protocol 
